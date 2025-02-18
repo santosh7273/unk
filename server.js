@@ -65,23 +65,21 @@ app.put("/update", async (req, res) => {
 
 app.delete("/delete", async (req, res) => {
   try {
-    const { name, email } = req.body;
-    
-    if (!name || !email) {
-      return res.status(400).json({ message: "Name and Email are required" });
-    }
-
-    const deletedEntry = await Form.findOneAndDelete({ name, email });
-
+    let {name}=req.body;
+    // Find the user by name (case-insensitive)
+    const deletedEntry = await Form.findOneAndDelete({
+      name
+    });
     if (!deletedEntry) {
       return res.status(404).json({ message: "Entry not found" });
     }
 
-    res.json({ message: `User '${name}' deleted successfully` });
+    res.json({ message: `User '${name}' deleted successfully`});
   } catch (error) {
-    console.error("Error deleting entry:", error);
     res.status(500).json({ message: "Error deleting entry" });
   }
 });
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
