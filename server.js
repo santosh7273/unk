@@ -38,6 +38,50 @@ app.post("/contact", async (req, res) => {
     res.status(500).json({ error: "Error saving data" });
   }
 });
+app.put("/update", async (req, res) => {
+  try {
+    const { email, newName } = req.body;
+
+    if (!email || !newName) {
+      return res.status(400).json({ message: "Email and new name are required" });
+    }
+
+    // Find and update the user by email
+    const updatedUser = await Form.findOneAndUpdate(
+      { email: email },
+      { name: newName },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found with this email" });
+    }
+
+    res.json({ message: `User's name updated to '${newName}' successfully`, updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating entry", error });
+  }
+});
+
+app.delete("/delete/:un", async (req, res) => {
+  try {
+    const { un } = req.params;
+
+    // Find the user by name (case-insensitive)
+    const deletedEntry = await Form.findOneAndDelete({
+      name: { $regex: new RegExp(`^${un}$`, "i") }
+    });
+
+    if (!deletedEntry) {
+      return res.status(404).json({ message: "Entry not found" });
+    }
+
+    res.json({ message: `User '${un}' deleted successfully`});
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting entry" });
+  }
+});
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
